@@ -55,3 +55,4 @@
  * @module
  */
 export * from "./wire.ts";
+export * from "./cable.ts";

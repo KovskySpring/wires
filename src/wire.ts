@@ -140,21 +140,15 @@ export class Wire<R = undefined> {
 
   /**
    * Whether the {@link Wire} is live.
-   *
-   * Narrows the instance interface into a
-   * {@link LiveWire}.
    */
-  public isLive(): this is LiveWire<R> {
+  public isLive(): this is typeof this & { state: ReadonlyLiveWireState } {
     return this.current.live;
   }
 
   /**
    * Whether the {@link Wire} is dead.
-   *
-   * Narrows the instance interface into a
-   * {@link DeadWire}.
    */
-  public isDead(): this is DeadWire<R> {
+  public isDead(): this is typeof this & { state: ReadonlyDeadWireState<R> } {
     return !this.current.live;
   }
 
@@ -180,8 +174,8 @@ export class Wire<R = undefined> {
    * event.
    */
   public once(fun: WireCutCallback<R>): () => void {
-    if (this.isDead()) {
-      fun(this.reason);
+    if (!this.current.live) {
+      fun(this.current.reason);
       return NOOP;
     }
 
@@ -270,40 +264,6 @@ export class Wire<R = undefined> {
 }
 
 /**
- * The Live variant of the {@link Wire}.
- *
- * @template R The type of the reason the {@link Wire} is dead.
- */
-export interface LiveWire<R = undefined> extends Wire<R> {
-  /**
-   * The current state of the {@link Wire}
-   */
-  get state(): ReadonlyLiveWireState;
-  /**
-   * The reason the {@link Wire} is dead.
-   *
-   * Is `undefined` if the {@link Wire} is live.
-   */
-  get reason(): R | undefined;
-}
-
-/**
- * The Dead variant of the {@link Wire}.
- *
- * @template R The type of the reason the {@link Wire} is dead.
- */
-export interface DeadWire<R = undefined> extends Wire<R> {
-  /**
-   * The current state of the {@link Wire}
-   */
-  get state(): ReadonlyDeadWireState<R>;
-  /**
-   * The reason the {@link Wire} is dead.
-   */
-  get reason(): R;
-}
-
-/**
  * Create a new {@link Wire}. Equivalent to `new Wire<R>()`.
  *
  * @template R The type of the reason the {@link Wire} is dead.
@@ -355,21 +315,19 @@ export class Breaker<R = undefined> {
 
   /**
    * Whether the {@link Breaker} is live.
-   *
-   * Narrows the instance interface into a
-   * {@link LiveBreaker}.
    */
-  public isLive(): this is LiveBreaker<R> {
+  public isLive(): this is typeof this & {
+    wire: Wire<R> & { state: ReadonlyLiveWireState };
+  } {
     return this.current.isLive();
   }
 
   /**
    * Whether the {@link Breaker} is dead.
-   *
-   * Narrows the instance interface into a
-   * {@link DeadBreaker}.
    */
-  public isDead(): this is DeadBreaker<R> {
+  public isDead(): this is typeof this & {
+    wire: Wire<R> & { state: ReadonlyDeadWireState<R> };
+  } {
     return this.current.isDead();
   }
 
@@ -460,7 +418,7 @@ export class Breaker<R = undefined> {
    * @param reason The reason the {@link Breaker} is reset.
    * @template R The type of the reason the {@link Breaker} is dead.
    */
-  public reset(this: Breaker<undefined>, reason?: R): void;
+  public reset(this: Breaker<undefined>, reason?: R): Wire<R>;
   /**
    * Reset the {@link Breaker}'s current {@link Wire} to a new live {@link Wire}.
    *
@@ -479,7 +437,7 @@ export class Breaker<R = undefined> {
    * @param reason The reason the {@link Breaker} is reset.
    * @template R The type of the reason the {@link Breaker} is dead.
    */
-  public reset<R>(this: Breaker<R>, reason: R): void;
+  public reset<R>(this: Breaker<R>, reason: R): Wire<R>;
   /**
    * Reset the {@link Breaker}'s current {@link Wire} to a new live {@link Wire}.
    *
@@ -498,48 +456,11 @@ export class Breaker<R = undefined> {
    * @param reason The reason the {@link Breaker} is reset.
    * @template R The type of the reason the {@link Breaker} is dead.
    */
-  public reset(reason: R): void {
+  public reset(reason: R): Wire<R> {
     this.cut(reason);
     this.current = new Wire<R>();
+    return this.current;
   }
-}
-
-/**
- * The Live variant of the {@link Breaker}.
- *
- * @template R The type of the reason the {@link Breaker} is dead.
- */
-export interface LiveBreaker<R> extends Breaker<R> {
-  /**
-   * The current {@link Wire} instance.
-   *
-   * Rotated out when {@link Breaker.reset} is called.
-   */
-  get wire(): LiveWire<R>;
-  /**
-   * The reason the {@link Breaker} is dead.
-   *
-   * Is `undefined` if the {@link Breaker} is live.
-   */
-  get reason(): R | undefined;
-}
-
-/**
- * The Dead variant of the {@link Breaker}.
- *
- * @template R The type of the reason the {@link Breaker} is dead.
- */
-export interface DeadBreaker<R> extends Breaker<R> {
-  /**
-   * The current {@link Wire} instance.
-   *
-   * Rotated out when {@link Breaker.reset} is called.
-   */
-  get wire(): DeadWire<R>;
-  /**
-   * The reason the {@link Breaker} is dead.
-   */
-  get reason(): R;
 }
 
 /**
