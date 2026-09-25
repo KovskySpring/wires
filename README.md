@@ -50,8 +50,7 @@ function refresh() {
 
 Wires are extended forms of
 [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
-and
-[AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)
+and [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal)
 
 ---
 
