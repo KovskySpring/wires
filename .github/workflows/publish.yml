@@ -1,0 +1,50 @@
+name: publish
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: ["main"]
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MISE_EXPERIMENTAL: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - name: verify tag matches deno.json version
+        if: github.event_name == 'release'
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(jq -re .version deno.json)"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} does not match deno.json version ${version}"
+            exit 1
+          fi
+      - uses: jdx/mise-action@v3
+      - run: mise run ci
+      - run: deno publish --dry-run
+
+  publish:
+    needs: check
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v3
+      - run: deno publish

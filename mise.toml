@@ -1,0 +1,20 @@
+[tools]
+deno = "latest"
+
+[tasks.fmt]
+run = "deno fmt --check"
+
+[tasks.lint]
+run = ["deno lint", "deno doc --lint src"]
+
+[tasks.test]
+run = "deno test"
+
+[tasks.ci]
+depends = ["fmt", "lint", "test"]
+
+[tasks.bump]
+run = "deno bump-version"
+
+[settings]
+minimum_release_age = "1d"

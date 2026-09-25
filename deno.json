@@ -1,0 +1,22 @@
+{
+  "name": "@tinymirror/wires",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "author": "Nhan Nguyen",
+  "description": "Writing declarative asynchronous logic and animations in Typescript",
+  "exports": {
+    ".": "./src/mod.ts"
+  },
+  "tasks": {
+    "test": "deno test",
+    "docs": "deno run --allow-run=deno scripts/docs.ts",
+    "docs:watch": "deno run --watch=src --allow-run=deno scripts/docs.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1"
+  },
+  "publish": {
+    "include": ["LICENSE", "README.md", "deno.json", "src/**/*"],
+    "exclude": ["src/**/*.test.ts"]
+  }
+}
