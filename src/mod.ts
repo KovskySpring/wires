@@ -34,7 +34,7 @@
  * // declarative logic handling
  * function refresh() {
  *   // abort the last run and prepare the next one
- *   const wire = controller.renew()
+ *   const wire = controller.reset()
  *
  *   // run some async logic or animations
  *   // checks if the wire is running after async

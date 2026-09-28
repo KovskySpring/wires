@@ -5,7 +5,8 @@
   "author": "Nhan Nguyen",
   "description": "Writing declarative asynchronous logic and animations in Typescript",
   "exports": {
-    ".": "./src/mod.ts"
+    ".": "./src/mod.ts",
+    "./cable": "./src/cable/mod.ts"
   },
   "tasks": {
     "test": "deno test",
