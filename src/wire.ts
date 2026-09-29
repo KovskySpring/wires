@@ -1,82 +1,82 @@
 /**
- * The Live variant of the {@link WireState}.
+ * The Live variant of the {@linkcode WireState}.
  */
 export interface LiveWireState {
   /**
-   * The state of the {@link Wire}.
+   * The state of the {@linkcode Wire}.
    */
   live: true;
 }
 
 /**
- * The Dead variant of the {@link WireState}.
+ * The Dead variant of the {@linkcode WireState}.
  *
- * Includes the reason the {@link Wire} is dead.
+ * Includes the reason the {@linkcode Wire} is dead.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface DeadWireState<R = undefined> {
   /**
-   * The state of the {@link Wire}.
+   * The state of the {@linkcode Wire}.
    */
   live: false;
   /**
-   * The reason the {@link Wire} is dead.
+   * The reason the {@linkcode Wire} is dead.
    */
   reason: R;
 }
 
 /**
- * The state of a {@link Wire}.
+ * The state of a {@linkcode Wire}.
  *
- * A union of {@link LiveWireState} and {@link DeadWireState}
+ * A union of {@linkcode LiveWireState} and {@linkcode DeadWireState}
  * discriminated using the property `live`.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export type WireState<R = undefined> = LiveWireState | DeadWireState<R>;
 
 /**
- * The read-only interface for a {@link LiveWireState}.
+ * The read-only interface for a {@linkcode LiveWireState}.
  *
- * The Live variant of the {@link WireState}.
+ * The Live variant of the {@linkcode WireState}.
  */
 export interface ReadonlyLiveWireState extends LiveWireState {
   /**
-   * The state of the {@link Wire}.
+   * The state of the {@linkcode Wire}.
    */
   readonly live: true;
 }
 
 /**
- * The read-only interface for a {@link DeadWireState}.
+ * The read-only interface for a {@linkcode DeadWireState}.
  *
- * The Dead variant of the {@link WireState}.
+ * The Dead variant of the {@linkcode WireState}.
  *
- * Includes the reason the {@link Wire} is dead.
+ * Includes the reason the {@linkcode Wire} is dead.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface ReadonlyDeadWireState<R = undefined> extends DeadWireState<R> {
   /**
-   * The state of the {@link Wire}.
+   * The state of the {@linkcode Wire}.
    */
   readonly live: false;
   /**
-   * The reason the {@link Wire} is dead.
+   * The reason the {@linkcode Wire} is dead.
    */
   readonly reason: R;
 }
 
 /**
- * The read-only interface for a {@link WireState}.
+ * The read-only interface for a {@linkcode WireState}.
  *
- * The state of a {@link Wire}.
+ * The state of a {@linkcode Wire}.
  *
- * A union of {@link LiveWireState} and {@link DeadWireState}
+ * A union of {@linkcode LiveWireState} and {@linkcode DeadWireState}
  * discriminated using the property `live`.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export type ReadonlyWireState<R = undefined> =
   | ReadonlyLiveWireState
@@ -93,84 +93,84 @@ function createDeadWireState<R = undefined>(reason: R): DeadWireState<R> {
 const NOOP = () => {};
 
 /**
- * The callback invoked when a {@link Wire} is cut.
+ * The callback invoked when a {@linkcode Wire} is cut.
  *
- * @param reason The reason the {@link Wire} is cut.
+ * @param reason The reason the {@linkcode Wire} is cut.
  */
 export type WireCutCallback<R = undefined> = (reason: R) => void;
 
 /**
  * Declaratively manage asynchronous logic or timed animation.
  *
- * - Check if the wire is live using {@link Wire.isLive} before running logic.
- * - Skip logic if the wire is dead using {@link Wire.isDead}.
- * - React to wire cuts using {@link Wire.once}.
+ * - Check if the wire is live using {@linkcode Wire.isLive} before running logic.
+ * - Skip logic if the wire is dead using {@linkcode Wire.isDead}.
+ * - React to wire cuts using {@linkcode Wire.once}.
  *
  * **Note**: It is recommended that you create and control wires through the
- * {@link Breaker} rather than on the {@link Wire} directly.
- * See "Anti Patterns" in module documentations. You can still use {@link Wire}
+ * {@linkcode Breaker} rather than on the {@linkcode Wire} directly.
+ * See "Anti Patterns" in module documentations. You can still use {@linkcode Wire}
  * directly should you wish to.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export class Wire<R = undefined> {
   /**
-   * The current state of the {@link Wire}.
+   * The current state of the {@linkcode Wire}.
    */
   protected current: WireState<R> = createLiveWireState();
 
   /**
    * The next callback index used as the key
-   * for the next callback in {@link Wire.callbacks}.
+   * for the next callback in {@linkcode Wire.callbacks}.
    */
   protected nextCallbackIndex = 0;
 
   /**
-   * The callback map emitted when {@link Wire.cut}
+   * The callback map emitted when {@linkcode Wire.cut}
    * is called.
    */
   protected callbacks: Map<number, WireCutCallback<R>> = new Map();
 
   /**
-   * The current state of the {@link Wire}
+   * The current state of the {@linkcode Wire}
    */
   public get state(): ReadonlyWireState<R> {
     return this.current;
   }
 
   /**
-   * Whether the {@link Wire} is live.
+   * Whether the {@linkcode Wire} is live.
    */
   public isLive(): this is typeof this & { state: ReadonlyLiveWireState } {
     return this.current.live;
   }
 
   /**
-   * Whether the {@link Wire} is dead.
+   * Whether the {@linkcode Wire} is dead.
    */
   public isDead(): this is typeof this & { state: ReadonlyDeadWireState<R> } {
     return !this.current.live;
   }
 
   /**
-   * The reason the {@link Wire} is dead.
+   * The reason the {@linkcode Wire} is dead.
    *
-   * Is `undefined` if the {@link Wire} is live.
+   * Is `undefined` if the {@linkcode Wire} is live.
    */
   public get reason(): R | undefined {
     return this.current.live ? undefined : this.current.reason;
   }
 
   /**
-   * Listen to when the {@link Wire} is cut.
+   * Listen to when the {@linkcode Wire} is cut.
    *
    * The callback is automatically unsubscribed after the first
    * invocation.
    *
    * Use the returned function to unsubscribe early.
    *
-   * @param fun The callback invoked when a {@link Wire} is cut.
-   * @returns A function to unsubscribe from the {@link Wire}'s cut
+   * @param fun The callback invoked when a {@linkcode Wire} is cut.
+   * @returns A function to unsubscribe from the {@linkcode Wire}'s cut
    * event.
    */
   public once(fun: WireCutCallback<R>): () => void {
@@ -187,9 +187,9 @@ export class Wire<R = undefined> {
   }
 
   /**
-   * Cut a {@link Wire} and invoke all callbacks.
+   * Cut a {@linkcode Wire} and invoke all callbacks.
    *
-   * The {@link Wire} will be set to dead before the callbacks
+   * The {@linkcode Wire} will be set to dead before the callbacks
    * are invoked.
    *
    * If the reason type is `undefined` you can leave the param
@@ -205,14 +205,14 @@ export class Wire<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your cut. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Wire} is cut.
-   * @template R The type of the reason the {@link Wire} is dead.
+   * @param reason The reason the {@linkcode Wire} is cut.
+   * @template R The type of the reason the {@linkcode Wire} is dead.
    */
   public cut(this: Wire<undefined>, reason?: R): void;
   /**
-   * Cut a {@link Wire} and invoke all callbacks.
+   * Cut a {@linkcode Wire} and invoke all callbacks.
    *
-   * The {@link Wire} will be set to dead before the callbacks
+   * The {@linkcode Wire} will be set to dead before the callbacks
    * are invoked.
    *
    * If the reason type is `undefined` you can leave the param
@@ -228,14 +228,14 @@ export class Wire<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your cut. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Wire} is cut.
-   * @template R The type of the reason the {@link Wire} is dead.
+   * @param reason The reason the {@linkcode Wire} is cut.
+   * @template R The type of the reason the {@linkcode Wire} is dead.
    */
   public cut<R>(this: Wire<R>, reason: R): void;
   /**
-   * Cut a {@link Wire} and invoke all callbacks.
+   * Cut a {@linkcode Wire} and invoke all callbacks.
    *
-   * The {@link Wire} will be set to dead before the callbacks
+   * The {@linkcode Wire} will be set to dead before the callbacks
    * are invoked.
    *
    * If the reason type is `undefined` you can leave the param
@@ -251,8 +251,8 @@ export class Wire<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your cut. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Wire} is cut.
-   * @template R The type of the reason the {@link Wire} is dead.
+   * @param reason The reason the {@linkcode Wire} is cut.
+   * @template R The type of the reason the {@linkcode Wire} is dead.
    */
   public cut(reason: R): void {
     this.current = createDeadWireState(reason);
@@ -264,10 +264,10 @@ export class Wire<R = undefined> {
 }
 
 /**
- * Create a new {@link Wire}. Equivalent to `new Wire<R>()`.
+ * Create a new {@linkcode Wire}. Equivalent to `new Wire<R>()`.
  *
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns A new {@link Wire}.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns A new {@linkcode Wire}.
  */
 export function wire<R = undefined>(): Wire<R> {
   return new Wire<R>();
@@ -276,45 +276,45 @@ export function wire<R = undefined>(): Wire<R> {
 /**
  * Declaratively manage asynchronous logic or timed animation.
  *
- * - Check if the wire is live using {@link Breaker.isLive} before running logic.
- * - Skip logic if the wire is dead using {@link Breaker.isDead}.
- * - React to wire cuts using {@link Breaker.wire.once}.
+ * - Check if the wire is live using {@linkcode Breaker.isLive} before running logic.
+ * - Skip logic if the wire is dead using {@linkcode Breaker.isDead}.
+ * - React to wire cuts using {@linkcode Breaker.wire.once}.
  *
  * **Note**: It is recommended that you create and control wires through the
- * {@link Breaker} rather than on the {@link Wire} directly.
- * See "Anti Patterns" in module documentations. You can still use {@link Wire}
+ * {@linkcode Breaker} rather than on the {@linkcode Wire} directly.
+ * See "Anti Patterns" in module documentations. You can still use {@linkcode Wire}
  * directly should you wish to.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export class Breaker<R = undefined> {
   /**
-   * The current {@link Wire} instance.
+   * The current {@linkcode Wire} instance.
    *
-   * Rotated out when {@link Breaker.reset} is called.
+   * Rotated out when {@linkcode Breaker.reset} is called.
    */
   protected current: Wire<R> = new Wire();
 
   /**
-   * The current {@link Wire} instance.
+   * The current {@linkcode Wire} instance.
    *
-   * Rotated out when {@link Breaker.reset} is called.
+   * Rotated out when {@linkcode Breaker.reset} is called.
    */
   public get wire(): Wire<R> {
     return this.current;
   }
 
   /**
-   * The reason the {@link Breaker} is dead.
+   * The reason the {@linkcode Breaker} is dead.
    *
-   * Is `undefined` if the {@link Breaker} is live.
+   * Is `undefined` if the {@linkcode Breaker} is live.
    */
   public get reason(): R | undefined {
     return this.current.reason;
   }
 
   /**
-   * Whether the {@link Breaker} is live.
+   * Whether the {@linkcode Breaker} is live.
    */
   public isLive(): this is typeof this & {
     wire: Wire<R> & { state: ReadonlyLiveWireState };
@@ -323,7 +323,7 @@ export class Breaker<R = undefined> {
   }
 
   /**
-   * Whether the {@link Breaker} is dead.
+   * Whether the {@linkcode Breaker} is dead.
    */
   public isDead(): this is typeof this & {
     wire: Wire<R> & { state: ReadonlyDeadWireState<R> };
@@ -332,9 +332,9 @@ export class Breaker<R = undefined> {
   }
 
   /**
-   * Cut the {@link Breaker}'s current {@link Wire} and invoke all callbacks.
+   * Cut the {@linkcode Breaker}'s current {@linkcode Wire} and invoke all callbacks.
    *
-   * The {@link Breaker} will be set to dead before the callbacks
+   * The {@linkcode Breaker} will be set to dead before the callbacks
    * are invoked.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
@@ -349,14 +349,14 @@ export class Breaker<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your cut. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Breaker} is cut.
-   * @template R The type of the reason the {@link Breaker} is dead.
+   * @param reason The reason the {@linkcode Breaker} is cut.
+   * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public cut(this: Breaker<undefined>, reason?: R): void;
   /**
-   * Cut the {@link Breaker}'s current {@link Wire} and invoke all callbacks.
+   * Cut the {@linkcode Breaker}'s current {@linkcode Wire} and invoke all callbacks.
    *
-   * The {@link Breaker} will be set to dead before the callbacks
+   * The {@linkcode Breaker} will be set to dead before the callbacks
    * are invoked.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
@@ -371,14 +371,14 @@ export class Breaker<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your cut. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Breaker} is cut.
-   * @template R The type of the reason the {@link Breaker} is dead.
+   * @param reason The reason the {@linkcode Breaker} is cut.
+   * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public cut<R>(this: Breaker<R>, reason: R): void;
   /**
-   * Cut the {@link Breaker}'s current {@link Wire} and invoke all callbacks.
+   * Cut the {@linkcode Breaker}'s current {@linkcode Wire} and invoke all callbacks.
    *
-   * The {@link Breaker} will be set to dead before the callbacks
+   * The {@linkcode Breaker} will be set to dead before the callbacks
    * are invoked.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
@@ -393,15 +393,15 @@ export class Breaker<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your cut. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Breaker} is cut.
-   * @template R The type of the reason the {@link Breaker} is dead.
+   * @param reason The reason the {@linkcode Breaker} is cut.
+   * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public cut(reason: R): void {
     this.current.cut(reason);
   }
 
   /**
-   * Reset the {@link Breaker}'s current {@link Wire} to a new live {@link Wire}.
+   * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
@@ -415,12 +415,12 @@ export class Breaker<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your reset. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Breaker} is reset.
-   * @template R The type of the reason the {@link Breaker} is dead.
+   * @param reason The reason the {@linkcode Breaker} is reset.
+   * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public reset(this: Breaker<undefined>, reason?: R): Wire<R>;
   /**
-   * Reset the {@link Breaker}'s current {@link Wire} to a new live {@link Wire}.
+   * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
@@ -434,12 +434,12 @@ export class Breaker<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your reset. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Breaker} is reset.
-   * @template R The type of the reason the {@link Breaker} is dead.
+   * @param reason The reason the {@linkcode Breaker} is reset.
+   * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public reset<R>(this: Breaker<R>, reason: R): Wire<R>;
   /**
-   * Reset the {@link Breaker}'s current {@link Wire} to a new live {@link Wire}.
+   * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
@@ -453,8 +453,8 @@ export class Breaker<R = undefined> {
    * you defined the type `R` but forgot to include a reason
    * in your reset. `reason` is required in this scenario.
    *
-   * @param reason The reason the {@link Breaker} is reset.
-   * @template R The type of the reason the {@link Breaker} is dead.
+   * @param reason The reason the {@linkcode Breaker} is reset.
+   * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public reset(reason: R): Wire<R> {
     this.cut(reason);
@@ -464,10 +464,10 @@ export class Breaker<R = undefined> {
 }
 
 /**
- * Create a new {@link Breaker}. Equivalent to `new Breaker<R>()`.
+ * Create a new {@linkcode Breaker}. Equivalent to `new Breaker<R>()`.
  *
- * @template R The type of the reason the {@link Breaker} is dead.
- * @returns A new {@link Breaker}.
+ * @template R The type of the reason the {@linkcode Breaker} is dead.
+ * @returns A new {@linkcode Breaker}.
  */
 export function breaker<R = undefined>(): Breaker<R> {
   return new Breaker<R>();

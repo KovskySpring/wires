@@ -3,9 +3,9 @@
  *
  * Declaratively manage asynchronous logic or timed animation.
  *
- * - Check if the wire is live using {@link Wire.isLive} before running logic.
- * - Skip logic if the wire is dead using {@link Wire.isDead}.
- * - React to wire cuts using {@link Wire.once}.
+ * - Check if the wire is live using {@linkcode Wire.isLive} before running logic.
+ * - Skip logic if the wire is dead using {@linkcode Wire.isDead}.
+ * - React to wire cuts using {@linkcode Wire.once}.
  *
  * ```ts
  * import { breaker, Breaker } from "@tinymirror/wires";

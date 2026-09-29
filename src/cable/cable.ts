@@ -1,16 +1,16 @@
 import type { Wire } from "../wire.ts";
 
 /**
- * The Live variant of the {@link Cable}.
+ * The Live variant of the {@linkcode Cable}.
  *
  * Holds the carried value.
  *
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface LiveCable<T, R> {
   /**
-   * The state of the {@link Cable}.
+   * The state of the {@linkcode Cable}.
    */
   live: true;
   /**
@@ -18,66 +18,66 @@ export interface LiveCable<T, R> {
    */
   value: T;
   /**
-   * The {@link Wire} the {@link Cable} is bound to.
+   * The {@linkcode Wire} the {@linkcode Cable} is bound to.
    */
   wire: Wire<R>;
 }
 
 /**
- * The Dead variant of the {@link Cable}.
+ * The Dead variant of the {@linkcode Cable}.
  *
  * Holds no value.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface DeadCable<R> {
   /**
-   * The state of the {@link Cable}.
+   * The state of the {@linkcode Cable}.
    */
   live: false;
   /**
-   * The {@link Wire} the {@link Cable} is bound to.
+   * The {@linkcode Wire} the {@linkcode Cable} is bound to.
    */
   wire: Wire<R>;
 }
 
 /**
- * A value bound to a {@link Wire}.
+ * A value bound to a {@linkcode Wire}.
  *
- * A union of {@link LiveCable} and {@link DeadCable}
+ * A union of {@linkcode LiveCable} and {@linkcode DeadCable}
  * discriminated using the property `live`.
  *
- * A {@link LiveCable} is treated as dead once its {@link Wire} is cut.
+ * A {@linkcode LiveCable} is treated as dead once its {@linkcode Wire} is cut.
  *
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export type Cable<T, R> = LiveCable<T, R> | DeadCable<R>;
 
 /**
- * A chainable interface over a {@link Cable}.
+ * A chainable interface over a {@linkcode Cable}.
  *
- * Create one using {@link chain} or {@link wrapIntoChain}.
+ * Create one using {@linkcode chain} or {@linkcode wrapIntoChain}.
  *
- * Callbacks are skipped once the {@link Wire} is cut.
+ * Callbacks are skipped once the {@linkcode Wire} is cut.
  *
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface CableChain<T, R> {
   /**
-   * The underlying {@link Cable}.
+   * The underlying {@linkcode Cable}.
    */
   readonly cable: Cable<T, R>;
   /**
-   * Get the carried value, or `fallback` if the {@link Cable} is dead.
+   * Get the carried value, or `fallback` if the {@linkcode Cable} is dead.
    */
   readonly unwrap: (fallback: T) => T;
   /**
    * Get the carried value, or the result of `fallback` if the
-   * {@link Cable} is dead.
+   * {@linkcode Cable} is dead.
    *
-   * `fallback` is only called if the {@link Cable} is dead.
+   * `fallback` is only called if the {@linkcode Cable} is dead.
    */
   readonly unwrapLazily: (fallback: () => T) => T;
   /**
@@ -91,7 +91,7 @@ export interface CableChain<T, R> {
   /**
    * Transform the carried value using a callback that may be async.
    *
-   * Continues as an {@link AsyncCableChain}.
+   * Continues as an {@linkcode AsyncCableChain}.
    */
   readonly mapAsync: <U>(
     fn: (value: T) => U | Promise<U>,
@@ -99,7 +99,7 @@ export interface CableChain<T, R> {
   /**
    * Run a side effect that may be async with the carried value.
    *
-   * Continues as an {@link AsyncCableChain}.
+   * Continues as an {@linkcode AsyncCableChain}.
    */
   readonly tapAsync: (
     fn: (value: T) => void | Promise<void>,
@@ -107,28 +107,28 @@ export interface CableChain<T, R> {
 }
 
 /**
- * Bind a value to a {@link Wire}.
+ * Bind a value to a {@linkcode Wire}.
  *
- * Returns a {@link DeadCable} if the {@link Wire} is already dead.
+ * Returns a {@linkcode DeadCable} if the {@linkcode Wire} is already dead.
  *
- * @param wire The {@link Wire} to bind the value to.
+ * @param wire The {@linkcode Wire} to bind the value to.
  * @param value The value to carry.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns A {@link Cable} carrying `value`.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns A {@linkcode Cable} carrying `value`.
  */
 export function wrap<T, R>(wire: Wire<R>, value: T): Cable<T, R> {
   return wire.state.live ? { live: true, value, wire } : { live: false, wire };
 }
 
 /**
- * Get the value carried by a {@link Cable}.
+ * Get the value carried by a {@linkcode Cable}.
  *
- * @param cable The {@link Cable} to read.
- * @param fallback The value returned if the {@link Cable} or its
- * {@link Wire} is dead.
+ * @param cable The {@linkcode Cable} to read.
+ * @param fallback The value returned if the {@linkcode Cable} or its
+ * {@linkcode Wire} is dead.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  * @returns The carried value, or `fallback`.
  */
 export function unwrap<T, R>(cable: Cable<T, R>, fallback: T): T {
@@ -136,15 +136,15 @@ export function unwrap<T, R>(cable: Cable<T, R>, fallback: T): T {
 }
 
 /**
- * Get the value carried by a {@link Cable}.
+ * Get the value carried by a {@linkcode Cable}.
  *
- * Use over {@link unwrap} when the fallback is expensive to compute.
+ * Use over {@linkcode unwrap} when the fallback is expensive to compute.
  *
- * @param cable The {@link Cable} to read.
- * @param fallback Computes the value returned if the {@link Cable} or its
- * {@link Wire} is dead. Only called in that case.
+ * @param cable The {@linkcode Cable} to read.
+ * @param fallback Computes the value returned if the {@linkcode Cable} or its
+ * {@linkcode Wire} is dead. Only called in that case.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  * @returns The carried value, or the result of `fallback`.
  */
 export function unwrapLazily<T, R>(
@@ -155,17 +155,17 @@ export function unwrapLazily<T, R>(
 }
 
 /**
- * Transform the value carried by a {@link Cable}.
+ * Transform the value carried by a {@linkcode Cable}.
  *
- * `fn` is skipped if the {@link Cable} or its {@link Wire} is dead.
+ * `fn` is skipped if the {@linkcode Cable} or its {@linkcode Wire} is dead.
  *
- * @param cable The {@link Cable} to transform.
+ * @param cable The {@linkcode Cable} to transform.
  * @param fn Transforms the carried value.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  * @template U The type of the transformed value.
- * @returns A {@link Cable} carrying the transformed value, or a
- * {@link DeadCable}.
+ * @returns A {@linkcode Cable} carrying the transformed value, or a
+ * {@linkcode DeadCable}.
  */
 export function map<T, R, U>(
   cable: Cable<T, R>,
@@ -187,16 +187,16 @@ export function map<T, R, U>(
 }
 
 /**
- * Run a side effect with the value carried by a {@link Cable}.
+ * Run a side effect with the value carried by a {@linkcode Cable}.
  *
- * `fn` is skipped if the {@link Cable} or its {@link Wire} is dead.
+ * `fn` is skipped if the {@linkcode Cable} or its {@linkcode Wire} is dead.
  *
- * @param cable The {@link Cable} to read.
+ * @param cable The {@linkcode Cable} to read.
  * @param fn The side effect invoked with the carried value.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns The same {@link Cable}, or a {@link DeadCable} if the
- * {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns The same {@linkcode Cable}, or a {@linkcode DeadCable} if the
+ * {@linkcode Wire} is dead.
  */
 export function tap<T, R>(
   cable: Cable<T, R>,
@@ -216,20 +216,20 @@ export function tap<T, R>(
 }
 
 /**
- * Transform the value carried by a {@link Cable} using a callback that
+ * Transform the value carried by a {@linkcode Cable} using a callback that
  * may be async.
  *
- * `fn` is skipped if the {@link Cable} or its {@link Wire} is dead.
- * The result is a {@link DeadCable} if the {@link Wire} is cut while
+ * `fn` is skipped if the {@linkcode Cable} or its {@linkcode Wire} is dead.
+ * The result is a {@linkcode DeadCable} if the {@linkcode Wire} is cut while
  * `fn` runs.
  *
- * @param cable The {@link Cable}, or a promise of one, to transform.
+ * @param cable The {@linkcode Cable}, or a promise of one, to transform.
  * @param fn Transforms the carried value.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  * @template U The type of the transformed value.
- * @returns A promise of a {@link Cable} carrying the transformed value,
- * or a {@link DeadCable}.
+ * @returns A promise of a {@linkcode Cable} carrying the transformed value,
+ * or a {@linkcode DeadCable}.
  */
 export async function mapAsync<T, R, U>(
   cable: Cable<T, R> | Promise<Cable<T, R>>,
@@ -261,17 +261,17 @@ export async function mapAsync<T, R, U>(
 
 /**
  * Run a side effect that may be async with the value carried by a
- * {@link Cable}.
+ * {@linkcode Cable}.
  *
- * `fn` is skipped if the {@link Cable} or its {@link Wire} is dead.
- * The result is a {@link DeadCable} if the {@link Wire} is cut while
+ * `fn` is skipped if the {@linkcode Cable} or its {@linkcode Wire} is dead.
+ * The result is a {@linkcode DeadCable} if the {@linkcode Wire} is cut while
  * `fn` runs.
  *
- * @param cable The {@link Cable}, or a promise of one, to read.
+ * @param cable The {@linkcode Cable}, or a promise of one, to read.
  * @param fn The side effect invoked with the carried value.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns A promise of the same {@link Cable}, or a {@link DeadCable}.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns A promise of the same {@linkcode Cable}, or a {@linkcode DeadCable}.
  */
 export async function tapAsync<T, R>(
   cable: Cable<T, R> | Promise<Cable<T, R>>,
@@ -298,12 +298,12 @@ export async function tapAsync<T, R>(
 }
 
 /**
- * Wrap a {@link Cable} in a {@link CableChain}.
+ * Wrap a {@linkcode Cable} in a {@linkcode CableChain}.
  *
- * @param cable The {@link Cable} to wrap.
+ * @param cable The {@linkcode Cable} to wrap.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns A {@link CableChain} over `cable`.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns A {@linkcode CableChain} over `cable`.
  */
 export function chain<T, R>(cable: Cable<T, R>): CableChain<T, R> {
   return {
@@ -326,28 +326,28 @@ export function chain<T, R>(cable: Cable<T, R>): CableChain<T, R> {
 }
 
 /**
- * Bind a value to a {@link Wire} and wrap it in a {@link CableChain}.
+ * Bind a value to a {@linkcode Wire} and wrap it in a {@linkcode CableChain}.
  *
  * Equivalent to `chain(wrap(wire, value))`.
  *
- * @param wire The {@link Wire} to bind the value to.
+ * @param wire The {@linkcode Wire} to bind the value to.
  * @param value The value to carry.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns A {@link CableChain} carrying `value`.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns A {@linkcode CableChain} carrying `value`.
  */
 export function wrapIntoChain<T, R>(wire: Wire<R>, value: T): CableChain<T, R> {
   return chain(wrap(wire, value));
 }
 
 /**
- * The Live variant of the {@link AwaitedAsyncCable}.
+ * The Live variant of the {@linkcode AwaitedAsyncCable}.
  *
  * @template T The type of the carried value.
  */
 export interface LiveAwaitedAsyncCable<T> {
   /**
-   * The state of the {@link AwaitedAsyncCable}.
+   * The state of the {@linkcode AwaitedAsyncCable}.
    */
   live: true;
   /**
@@ -357,22 +357,22 @@ export interface LiveAwaitedAsyncCable<T> {
 }
 
 /**
- * The Dead variant of the {@link AwaitedAsyncCable}.
+ * The Dead variant of the {@linkcode AwaitedAsyncCable}.
  */
 export interface DeadAwaitedAsyncCable {
   /**
-   * The state of the {@link AwaitedAsyncCable}.
+   * The state of the {@linkcode AwaitedAsyncCable}.
    */
   live: false;
 }
 
 /**
- * The resolved value of a {@link LiveAsyncCable}.
+ * The resolved value of a {@linkcode LiveAsyncCable}.
  *
- * A union of {@link LiveAwaitedAsyncCable} and {@link DeadAwaitedAsyncCable}
+ * A union of {@linkcode LiveAwaitedAsyncCable} and {@linkcode DeadAwaitedAsyncCable}
  * discriminated using the property `live`.
  *
- * Is dead if the {@link Wire} is cut before pending callbacks finish.
+ * Is dead if the {@linkcode Wire} is cut before pending callbacks finish.
  *
  * @template T The type of the carried value.
  */
@@ -381,16 +381,16 @@ export type AwaitedAsyncCable<T> =
   | DeadAwaitedAsyncCable;
 
 /**
- * The Live variant of the {@link AsyncCable}.
+ * The Live variant of the {@linkcode AsyncCable}.
  *
  * Holds a promise of the carried value.
  *
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface LiveAsyncCable<T, R> {
   /**
-   * The state of the {@link AsyncCable}.
+   * The state of the {@linkcode AsyncCable}.
    */
   live: true;
   /**
@@ -398,68 +398,68 @@ export interface LiveAsyncCable<T, R> {
    */
   value: Promise<AwaitedAsyncCable<T>>;
   /**
-   * The {@link Wire} the {@link AsyncCable} is bound to.
+   * The {@linkcode Wire} the {@linkcode AsyncCable} is bound to.
    */
   wire: Wire<R>;
 }
 
 /**
- * The Dead variant of the {@link AsyncCable}.
+ * The Dead variant of the {@linkcode AsyncCable}.
  *
  * Holds no value.
  *
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface DeadAsyncCable<R> {
   /**
-   * The state of the {@link AsyncCable}.
+   * The state of the {@linkcode AsyncCable}.
    */
   live: false;
   /**
-   * The {@link Wire} the {@link AsyncCable} is bound to.
+   * The {@linkcode Wire} the {@linkcode AsyncCable} is bound to.
    */
   wire: Wire<R>;
 }
 
 /**
- * A pending value bound to a {@link Wire}.
+ * A pending value bound to a {@linkcode Wire}.
  *
- * A union of {@link LiveAsyncCable} and {@link DeadAsyncCable}
+ * A union of {@linkcode LiveAsyncCable} and {@linkcode DeadAsyncCable}
  * discriminated using the property `live`.
  *
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export type AsyncCable<T, R> =
   | LiveAsyncCable<T, R>
   | DeadAsyncCable<R>;
 
 /**
- * A chainable interface over an {@link AsyncCable}.
+ * A chainable interface over an {@linkcode AsyncCable}.
  *
- * Create one using {@link toAsyncCableChain}, or by calling `mapAsync`
- * or `tapAsync` on a {@link CableChain}.
+ * Create one using {@linkcode toAsyncCableChain}, or by calling `mapAsync`
+ * or `tapAsync` on a {@linkcode CableChain}.
  *
- * Callbacks are skipped once the {@link Wire} is cut.
+ * Callbacks are skipped once the {@linkcode Wire} is cut.
  *
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
  */
 export interface AsyncCableChain<T, R> {
   /**
-   * The underlying {@link AsyncCable}.
+   * The underlying {@linkcode AsyncCable}.
    */
   readonly cable: AsyncCable<T, R>;
   /**
-   * Resolve the carried value, or `fallback` if the {@link AsyncCable}
+   * Resolve the carried value, or `fallback` if the {@linkcode AsyncCable}
    * is dead.
    */
   readonly unwrap: (fallback: T | Promise<T>) => Promise<T>;
   /**
    * Resolve the carried value, or the result of `fallback` if the
-   * {@link AsyncCable} is dead.
+   * {@linkcode AsyncCable} is dead.
    *
-   * `fallback` is only called if the {@link AsyncCable} is dead.
+   * `fallback` is only called if the {@linkcode AsyncCable} is dead.
    */
   readonly unwrapLazily: (fallback: () => T | Promise<T>) => Promise<T>;
   /**
@@ -616,13 +616,13 @@ function chainAsync<T, R>(
 }
 
 /**
- * Convert a {@link Cable} into an {@link AsyncCable}.
+ * Convert a {@linkcode Cable} into an {@linkcode AsyncCable}.
  *
- * @param cable The {@link Cable} to convert.
+ * @param cable The {@linkcode Cable} to convert.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns An {@link AsyncCable} carrying the same value, or a
- * {@link DeadAsyncCable} if `cable` is dead.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns An {@linkcode AsyncCable} carrying the same value, or a
+ * {@linkcode DeadAsyncCable} if `cable` is dead.
  */
 export function toAsyncCable<T, R>(cable: Cable<T, R>): AsyncCable<T, R> {
   if (!cable.live) {
@@ -640,12 +640,12 @@ export function toAsyncCable<T, R>(cable: Cable<T, R>): AsyncCable<T, R> {
 }
 
 /**
- * Convert a {@link Cable} into an {@link AsyncCableChain}.
+ * Convert a {@linkcode Cable} into an {@linkcode AsyncCableChain}.
  *
- * @param cable The {@link Cable} to convert.
+ * @param cable The {@linkcode Cable} to convert.
  * @template T The type of the carried value.
- * @template R The type of the reason the {@link Wire} is dead.
- * @returns An {@link AsyncCableChain} over the converted {@link Cable}.
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @returns An {@linkcode AsyncCableChain} over the converted {@linkcode Cable}.
  */
 export function toAsyncCableChain<T, R>(
   cable: Cable<T, R>,

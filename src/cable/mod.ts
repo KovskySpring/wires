@@ -1,22 +1,22 @@
 /**
  * # Cables
  *
- * Bind values to a {@link Wire} and transform them only while the
- * {@link Wire} is live.
+ * Bind values to a {@linkcode Wire} and transform them only while the
+ * {@linkcode Wire} is live.
  *
- * - Bind a value using {@link wrap}.
- * - Transform it using {@link map}, {@link tap}, {@link mapAsync}, or
- *   {@link tapAsync}.
- * - Read it back using {@link unwrap} or {@link unwrapLazily}.
+ * - Bind a value using {@linkcode wrap}.
+ * - Transform it using {@linkcode map}, {@linkcode tap}, {@linkcode mapAsync}, or
+ *   {@linkcode tapAsync}.
+ * - Read it back using {@linkcode unwrap} or {@linkcode unwrapLazily}.
  *
- * Once the {@link Wire} is cut, callbacks are skipped and the
- * {@link Cable} turns dead. This includes cuts that happen while an
+ * Once the {@linkcode Wire} is cut, callbacks are skipped and the
+ * {@linkcode Cable} turns dead. This includes cuts that happen while an
  * async callback is running.
  *
  * ## Direct usage (recommended)
  *
- * Each utility function returns a {@link Cable} for the next step. Async
- * steps return a promise of a {@link Cable}, which you `await` yourself.
+ * Each utility function returns a {@linkcode Cable} for the next step. Async
+ * steps return a promise of a {@linkcode Cable}, which you `await` yourself.
  *
  * This is currently the optimized way to use cables.
  *
@@ -43,7 +43,7 @@
  *
  * ## Chains
  *
- * {@link wrapIntoChain} and {@link chain} pipe the same steps together and
+ * {@linkcode wrapIntoChain} and {@linkcode chain} pipe the same steps together and
  * handle the async unwrapping and rewrapping for you. They are not
  * optimized yet, so prefer direct usage.
  *
