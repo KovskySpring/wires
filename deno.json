@@ -1,6 +1,6 @@
 {
   "name": "@tinymirror/wires",
-  "version": "0.4.0",
+  "version": "0.3.1",
   "license": "Apache-2.0",
   "author": "Nhan Nguyen",
   "description": "Writing declarative asynchronous logic and animations in Typescript",
