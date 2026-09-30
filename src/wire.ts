@@ -105,10 +105,11 @@ export type WireCutCallback<R = undefined> = (reason: R) => void;
  * - Check if the wire is live using {@linkcode Wire.isLive} before running logic.
  * - Skip logic if the wire is dead using {@linkcode Wire.isDead}.
  * - React to wire cuts using {@linkcode Wire.once}.
+ * - Connect and propagate cuts using {@linkcode Wire.connect}.
  *
  * **Note**: It is recommended that you create and control wires through the
  * {@linkcode Breaker} rather than on the {@linkcode Wire} directly.
- * See "Anti Patterns" in module documentations. You can still use {@linkcode Wire}
+ * See "Anti Patterns" in module documentation. You can still use {@linkcode Wire}
  * directly should you wish to.
  *
  * @template R The type of the reason the {@linkcode Wire} is dead.
@@ -192,6 +193,8 @@ export class Wire<R = undefined> {
    * The {@linkcode Wire} will be set to dead before the callbacks
    * are invoked.
    *
+   * Does nothing if the {@linkcode Wire} is already dead.
+   *
    * If the reason type is `undefined` you can leave the param
    * `reason` empty. Otherwise, a `reason` is required.
    *
@@ -214,6 +217,8 @@ export class Wire<R = undefined> {
    *
    * The {@linkcode Wire} will be set to dead before the callbacks
    * are invoked.
+   *
+   * Does nothing if the {@linkcode Wire} is already dead.
    *
    * If the reason type is `undefined` you can leave the param
    * `reason` empty. Otherwise, a `reason` is required.
@@ -238,6 +243,8 @@ export class Wire<R = undefined> {
    * The {@linkcode Wire} will be set to dead before the callbacks
    * are invoked.
    *
+   * Does nothing if the {@linkcode Wire} is already dead.
+   *
    * If the reason type is `undefined` you can leave the param
    * `reason` empty. Otherwise, a `reason` is required.
    *
@@ -255,11 +262,33 @@ export class Wire<R = undefined> {
    * @template R The type of the reason the {@linkcode Wire} is dead.
    */
   public cut(reason: R): void {
+    if (!this.current.live) return;
     this.current = createDeadWireState(reason);
     const funs = [...this.callbacks.values()];
     for (const fun of funs) fun(reason);
     this.callbacks.clear();
     return;
+  }
+
+  /**
+   * Connect this {@linkcode Wire} to a parent {@linkcode Wire}.
+   *
+   * When the parent {@linkcode Wire} is cut, this {@linkcode Wire} is also cut
+   * with the same reason. If the parent is already dead, this
+   * {@linkcode Wire} is cut immediately.
+   *
+   * The connection is removed once either {@linkcode Wire} is cut.
+   *
+   * @param wire The parent {@linkcode Wire} to connect to.
+   * @returns A function to disconnect from the parent {@linkcode Wire}.
+   */
+  public connect(wire: Wire<R>): () => void {
+    const unsubscribeParent = wire.once((reason) => this.cut(reason));
+    const unsubscribeSelf = this.once(unsubscribeParent);
+    return () => {
+      unsubscribeParent();
+      unsubscribeSelf();
+    };
   }
 }
 
@@ -282,7 +311,7 @@ export function wire<R = undefined>(): Wire<R> {
  *
  * **Note**: It is recommended that you create and control wires through the
  * {@linkcode Breaker} rather than on the {@linkcode Wire} directly.
- * See "Anti Patterns" in module documentations. You can still use {@linkcode Wire}
+ * See "Anti Patterns" in module documentation. You can still use {@linkcode Wire}
  * directly should you wish to.
  *
  * @template R The type of the reason the {@linkcode Wire} is dead.
@@ -337,6 +366,8 @@ export class Breaker<R = undefined> {
    * The {@linkcode Breaker} will be set to dead before the callbacks
    * are invoked.
    *
+   * Does nothing if the current {@linkcode Wire} is already dead.
+   *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
    * This is done through class method this type overloading.
@@ -358,6 +389,8 @@ export class Breaker<R = undefined> {
    *
    * The {@linkcode Breaker} will be set to dead before the callbacks
    * are invoked.
+   *
+   * Does nothing if the current {@linkcode Wire} is already dead.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
@@ -381,6 +414,8 @@ export class Breaker<R = undefined> {
    * The {@linkcode Breaker} will be set to dead before the callbacks
    * are invoked.
    *
+   * Does nothing if the current {@linkcode Wire} is already dead.
+   *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
    * This is done through class method this type overloading.
@@ -403,6 +438,8 @@ export class Breaker<R = undefined> {
   /**
    * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
    *
+   * `reason` is ignored if the current {@linkcode Wire} is already dead.
+   *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
    * This is done through class method this type overloading.
@@ -422,6 +459,8 @@ export class Breaker<R = undefined> {
   /**
    * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
    *
+   * `reason` is ignored if the current {@linkcode Wire} is already dead.
+   *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
    * This is done through class method this type overloading.
@@ -440,6 +479,8 @@ export class Breaker<R = undefined> {
   public reset<R>(this: Breaker<R>, reason: R): Wire<R>;
   /**
    * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
+   *
+   * `reason` is ignored if the current {@linkcode Wire} is already dead.
    *
    * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
    *
