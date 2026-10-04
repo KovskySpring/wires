@@ -1,5 +1,37 @@
 import { assert, assertEquals, assertStrictEquals } from "@std/assert";
-import { breaker, wire } from "./wire.ts";
+import { breaker, type ReadonlyWire, wire } from "./wire.ts";
+
+Deno.test("unsubscribing during a cut stops a listener that has not run", () => {
+  const cut = wire();
+  const calls: string[] = [];
+  cut.once(() => {
+    calls.push("first");
+    unsubscribe();
+  });
+  const unsubscribe = cut.once(() => calls.push("second"));
+
+  cut.cut();
+
+  assertEquals(calls, ["first"]);
+});
+
+Deno.test("connect accepts a ReadonlyWire parent", () => {
+  const controller = breaker();
+  const parent: ReadonlyWire = controller.wire;
+  const child = wire();
+  child.connect(parent);
+
+  controller.cut();
+
+  assert(child.isDead());
+});
+
+Deno.test("ReadonlyWire hides cut from the type only", () => {
+  const readonly: ReadonlyWire = wire();
+
+  // @ts-expect-error `cut` is not part of `ReadonlyWire`
+  assertEquals(typeof readonly.cut, "function");
+});
 
 Deno.test("cut reports listener errors and runs the remaining listeners", () => {
   const reported: unknown[] = [];

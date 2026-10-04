@@ -12,6 +12,7 @@ import { map, tap, unwrap, unwrapLazily, wrap } from "../cable.ts";
  *
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @experimental
  */
 export interface CableChain<T, R> {
   /**
@@ -76,6 +77,7 @@ export interface CableChain<T, R> {
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
  * @returns A {@linkcode CableChain} over `cable`.
+ * @experimental
  */
 export function chain<T, R>(cable: Cable<T, R>): CableChain<T, R> {
   return {
@@ -99,6 +101,7 @@ export function chain<T, R>(cable: Cable<T, R>): CableChain<T, R> {
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
  * @returns A {@linkcode CableChain} carrying `value`.
+ * @experimental
  */
 export function wrapIntoChain<T, R>(wire: Wire<R>, value: T): CableChain<T, R> {
   return chain(wrap(wire, value));
@@ -108,6 +111,7 @@ export function wrapIntoChain<T, R>(wire: Wire<R>, value: T): CableChain<T, R> {
  * The Live variant of the {@linkcode AwaitedAsyncCable}.
  *
  * @template T The type of the carried value.
+ * @experimental
  */
 export interface LiveAwaitedAsyncCable<T> {
   /**
@@ -122,6 +126,8 @@ export interface LiveAwaitedAsyncCable<T> {
 
 /**
  * The Dead variant of the {@linkcode AwaitedAsyncCable}.
+ *
+ * @experimental
  */
 export interface DeadAwaitedAsyncCable {
   /**
@@ -143,6 +149,7 @@ export interface DeadAwaitedAsyncCable {
  * Is dead if the {@linkcode Wire} is cut before pending callbacks finish.
  *
  * @template T The type of the carried value.
+ * @experimental
  */
 export type AwaitedAsyncCable<T> =
   | LiveAwaitedAsyncCable<T>
@@ -163,6 +170,7 @@ function deadAwaitedAsyncCable(): DeadAwaitedAsyncCable {
  *
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @experimental
  */
 export interface LiveAsyncCable<T, R> {
   /**
@@ -185,6 +193,7 @@ export interface LiveAsyncCable<T, R> {
  * Holds no value.
  *
  * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @experimental
  */
 export interface DeadAsyncCable<R> {
   /**
@@ -209,6 +218,7 @@ export interface DeadAsyncCable<R> {
  *
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @experimental
  */
 export type AsyncCable<T, R> =
   | LiveAsyncCable<T, R>
@@ -235,6 +245,7 @@ function deadAsyncCable<R>(wire: Wire<R>): DeadAsyncCable<R> {
  *
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
+ * @experimental
  */
 export interface AsyncCableChain<T, R> {
   /**
@@ -378,6 +389,7 @@ function chainAsync<T, R>(
  * @template R The type of the reason the {@linkcode Wire} is dead.
  * @returns An {@linkcode AsyncCable} carrying the same value, or a
  * {@linkcode DeadAsyncCable} if `cable` is dead.
+ * @experimental
  */
 export function toAsyncCable<T, R>(cable: Cable<T, R>): AsyncCable<T, R> {
   if (!cable.live) return deadAsyncCable(cable.wire);
@@ -394,6 +406,7 @@ export function toAsyncCable<T, R>(cable: Cable<T, R>): AsyncCable<T, R> {
  * @template T The type of the carried value.
  * @template R The type of the reason the {@linkcode Wire} is dead.
  * @returns An {@linkcode AsyncCableChain} over the converted {@linkcode Cable}.
+ * @experimental
  */
 export function toAsyncCableChain<T, R>(
   cable: Cable<T, R>,

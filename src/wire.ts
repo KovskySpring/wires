@@ -109,6 +109,45 @@ const report: (error: unknown) => void =
 export type WireCutCallback<R = undefined> = (reason: R) => void;
 
 /**
+ * The read-only interface for a {@linkcode Wire}. It has no `cut`.
+ *
+ * Use it to type wires that should not be cut, such as wires passed as
+ * arguments.
+ *
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ */
+export interface ReadonlyWire<R = undefined> {
+  /**
+   * The current state of the {@linkcode Wire}.
+   */
+  readonly state: ReadonlyWireState<R>;
+
+  /**
+   * The reason the {@linkcode Wire} is dead.
+   *
+   * Is `undefined` if the {@linkcode Wire} is live.
+   */
+  readonly reason: R | undefined;
+
+  /**
+   * Whether the {@linkcode Wire} is live.
+   */
+  isLive(): this is this & { state: ReadonlyLiveWireState };
+
+  /**
+   * Whether the {@linkcode Wire} is dead.
+   */
+  isDead(): this is this & { state: ReadonlyDeadWireState<R> };
+
+  /**
+   * Listen to when the {@linkcode Wire} is cut.
+   *
+   * See {@linkcode Wire.once}.
+   */
+  once(fun: WireCutCallback<R>): () => void;
+}
+
+/**
  * Declaratively manage asynchronous logic or timed animation.
  *
  * - Check if the wire is live using {@linkcode Wire.isLive} before running logic.
@@ -123,7 +162,7 @@ export type WireCutCallback<R = undefined> = (reason: R) => void;
  *
  * @template R The type of the reason the {@linkcode Wire} is dead.
  */
-export class Wire<R = undefined> {
+export class Wire<R = undefined> implements ReadonlyWire<R> {
   /**
    * The current state of the {@linkcode Wire}.
    */
@@ -278,9 +317,9 @@ export class Wire<R = undefined> {
   public cut(reason: R): void {
     if (!this.current.live) return;
     this.current = createDeadWireState(reason);
-    const funs = [...this.callbacks.values()];
-    this.callbacks.clear();
-    for (const fun of funs) {
+    // Iterate the map itself so a listener can unsubscribe the ones after it.
+    for (const [id, fun] of this.callbacks) {
+      this.callbacks.delete(id);
       try {
         fun(reason);
       } catch (error) {
@@ -301,7 +340,7 @@ export class Wire<R = undefined> {
    * @param wire The parent {@linkcode Wire} to connect to.
    * @returns A function to disconnect from the parent {@linkcode Wire}.
    */
-  public connect(wire: Wire<R>): () => void {
+  public connect(wire: ReadonlyWire<R>): () => void {
     const unsubscribeParent = wire.once((reason) => this.cut(reason));
     const unsubscribeSelf = this.once(unsubscribeParent);
     return () => {
