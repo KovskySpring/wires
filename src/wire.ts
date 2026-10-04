@@ -92,6 +92,15 @@ function createDeadWireState<R = undefined>(reason: R): DeadWireState<R> {
 
 const NOOP = () => {};
 
+// Node has no `reportError`: rethrow in a microtask to raise `uncaughtException`.
+const report: (error: unknown) => void =
+  typeof globalThis.reportError === "function"
+    ? (error) => globalThis.reportError(error)
+    : (error) =>
+      queueMicrotask(() => {
+        throw error;
+      });
+
 /**
  * The callback invoked when a {@linkcode Wire} is cut.
  *
@@ -169,6 +178,9 @@ export class Wire<R = undefined> {
    * invocation.
    *
    * Use the returned function to unsubscribe early.
+   *
+   * `fun` should catch and handle its own errors. Errors thrown are
+   * reported with `reportError`.
    *
    * @param fun The callback invoked when a {@linkcode Wire} is cut.
    * @returns A function to unsubscribe from the {@linkcode Wire}'s cut
@@ -265,9 +277,14 @@ export class Wire<R = undefined> {
     if (!this.current.live) return;
     this.current = createDeadWireState(reason);
     const funs = [...this.callbacks.values()];
-    for (const fun of funs) fun(reason);
     this.callbacks.clear();
-    return;
+    for (const fun of funs) {
+      try {
+        fun(reason);
+      } catch (error) {
+        report(error);
+      }
+    }
   }
 
   /**
