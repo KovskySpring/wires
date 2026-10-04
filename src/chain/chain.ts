@@ -245,6 +245,8 @@ export interface AsyncCableChain<T, R> {
   /**
    * Resolve the carried value, or `fallback` if the {@linkcode AsyncCable}
    * is dead.
+   *
+   * Rejects if a step rejects, even after the {@linkcode Wire} is cut.
    */
   readonly unwrap: (fallback: T | Promise<T>) => Promise<T>;
 
@@ -253,6 +255,8 @@ export interface AsyncCableChain<T, R> {
    * {@linkcode AsyncCable} is dead.
    *
    * `fallback` is only called if the {@linkcode AsyncCable} is dead.
+   *
+   * Rejects if a step rejects, even after the {@linkcode Wire} is cut.
    */
   readonly unwrapLazily: (fallback: () => T | Promise<T>) => Promise<T>;
 
@@ -297,18 +301,18 @@ async function unwrapAsyncCable<T, R>(
   cable: AsyncCable<T, R>,
   fallback: T | Promise<T>,
 ): Promise<T> {
-  if (!cable.live || !cable.wire.state.live) return fallback;
+  if (!cable.live) return fallback;
   const awaited = await cable.value;
-  return awaited.live ? awaited.value : fallback;
+  return awaited.live && cable.wire.state.live ? awaited.value : fallback;
 }
 
 async function unwrapAsyncCableLazily<T, R>(
   cable: AsyncCable<T, R>,
   fallback: () => T | Promise<T>,
 ): Promise<T> {
-  if (!cable.live || !cable.wire.state.live) return fallback();
+  if (!cable.live) return fallback();
   const awaited = await cable.value;
-  return awaited.live ? awaited.value : fallback();
+  return awaited.live && cable.wire.state.live ? awaited.value : fallback();
 }
 
 async function wrapCableTransformPromise<T, R, U>(
@@ -340,7 +344,6 @@ function mapAsyncCable<T, R, U>(
   fn: (value: T, wire: Wire<R>) => U | Promise<U>,
 ): AsyncCable<U, R> {
   if (!cable.live) return cable;
-  if (!cable.wire.state.live) return deadAsyncCable(cable.wire);
   return liveAsyncCable(wrapCableTransformPromise(cable, fn), cable.wire);
 }
 
@@ -349,7 +352,6 @@ function tapAsyncCable<T, R>(
   fn: (value: T, wire: Wire<R>) => void | Promise<void>,
 ): AsyncCable<T, R> {
   if (!cable.live) return cable;
-  if (!cable.wire.state.live) return deadAsyncCable(cable.wire);
   const value = wrapCableTapPromise(cable, fn);
   return liveAsyncCable(value, cable.wire);
 }
