@@ -37,8 +37,8 @@ const unsubscribe = wire.once((reason) => {
 
 // Prefer cutting from the controller, not the wire itself.
 
-// Cut the wire and abort any running logic
-// propagate events to all listeners.
+// Cut the wire and call its `once` listeners.
+// Running logic continues until it checks the wire.
 
 // Call controller.reset() to cut the wire and
 // prepare a new wire for the next run (returned).
@@ -80,7 +80,8 @@ Once the wire is cut, callbacks are skipped.
 ### Direct usage (recommended)
 
 Each utility function returns a cable for the next step. Async steps return a
-promise of a cable, which you `await` yourself.
+promise of a cable, which you `await` yourself. `mapAsync` and `tapAsync` also
+accept that promise directly.
 
 This is currently the optimized way to use cables.
 
@@ -249,6 +250,28 @@ Animations benefit from being stopped immediately.
 Listen to cut events when applying wires to animations. For declarative
 animations, stop a running animation as soon as its wire is cut, then let the
 next animation take control of the target's properties.
+
+```ts
+/// <reference lib="dom" />
+import { breaker } from "@tinymirror/wires";
+
+const fade = breaker();
+
+function fadeTo(element: HTMLElement, target: number) {
+  const wire = fade.reset(); // cut the previous fade
+
+  let frame = requestAnimationFrame(function step() {
+    // start from the current opacity, whatever the previous fade left
+    const current = Number(getComputedStyle(element).opacity);
+    const next = current + (target - current) * 0.2;
+    element.style.opacity = `${next}`;
+    if (Math.abs(target - next) > 0.01) frame = requestAnimationFrame(step);
+  });
+
+  // stop on cut and do nothing more
+  wire.once(() => cancelAnimationFrame(frame));
+}
+```
 
 ### 6. Avoid excessive cleanup on animations
 

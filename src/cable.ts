@@ -182,6 +182,8 @@ export function tap<T, R>(
  * The result is a {@linkcode DeadCable} if the {@linkcode Wire} is cut while
  * `fn` runs.
  *
+ * Rejects if `fn` rejects, even after the {@linkcode Wire} is cut.
+ *
  * @param cable The {@linkcode Cable}, or a promise of one, to transform.
  * @param fn Transforms the carried value. Also receives the bound
  * {@linkcode Wire}.
@@ -214,6 +216,8 @@ export async function mapAsync<T, R, U>(
  * `fn` is skipped if the {@linkcode Cable} or its {@linkcode Wire} is dead.
  * The result is a {@linkcode DeadCable} if the {@linkcode Wire} is cut while
  * `fn` runs.
+ *
+ * Rejects if `fn` rejects, even after the {@linkcode Wire} is cut.
  *
  * @param cable The {@linkcode Cable}, or a promise of one, to read.
  * @param fn The side effect invoked with the carried value and the bound

@@ -179,6 +179,8 @@ export class Wire<R = undefined> {
    *
    * Use the returned function to unsubscribe early.
    *
+   * If the {@linkcode Wire} is already dead, `fun` is called immediately.
+   *
    * `fun` should catch and handle its own errors. Errors thrown are
    * reported with `reportError`.
    *
@@ -322,11 +324,17 @@ export function wire<R = undefined>(): Wire<R> {
 /**
  * Declaratively manage asynchronous logic or timed animation.
  *
- * - Check if the wire is live using {@linkcode Breaker.isLive} before running logic.
- * - Skip logic if the wire is dead using {@linkcode Breaker.isDead}.
- * - React to wire cuts using {@linkcode Breaker.wire.once}.
+ * - Start a run using {@linkcode Breaker.reset}. It cuts the previous run and
+ *   returns the {@linkcode Wire} for this run.
+ * - Check that {@linkcode Wire} before running logic and after each `await`.
+ * - Cut the current run using {@linkcode Breaker.cut}.
  *
- * **Note**: It is recommended that you create and control wires through the
+ * **Note**: {@linkcode Breaker.isLive} and {@linkcode Breaker.isDead} read the
+ * latest {@linkcode Wire}. After an `await`, it can belong to a newer run.
+ * Inside a run, check the {@linkcode Wire} that {@linkcode Breaker.reset}
+ * returned.
+ *
+ * It is recommended that you create and control wires through the
  * {@linkcode Breaker} rather than on the {@linkcode Wire} directly.
  * See "Anti Patterns" in module documentation. You can still use {@linkcode Wire}
  * directly should you wish to.
@@ -361,6 +369,8 @@ export class Breaker<R = undefined> {
 
   /**
    * Whether the {@linkcode Breaker} is live.
+   *
+   * Reads the latest {@linkcode Wire}, which can belong to a newer run.
    */
   public isLive(): this is typeof this & {
     wire: Wire<R> & { state: ReadonlyLiveWireState };
@@ -370,6 +380,8 @@ export class Breaker<R = undefined> {
 
   /**
    * Whether the {@linkcode Breaker} is dead.
+   *
+   * Reads the latest {@linkcode Wire}, which can belong to a newer run.
    */
   public isDead(): this is typeof this & {
     wire: Wire<R> & { state: ReadonlyDeadWireState<R> };
