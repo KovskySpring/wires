@@ -92,15 +92,6 @@ function createDeadWireState<R = undefined>(reason: R): DeadWireState<R> {
 
 const NOOP = () => {};
 
-// Node has no `reportError`: rethrow in a microtask to raise `uncaughtException`.
-const report: (error: unknown) => void =
-  typeof globalThis.reportError === "function"
-    ? (error) => globalThis.reportError(error)
-    : (error) =>
-      queueMicrotask(() => {
-        throw error;
-      });
-
 /**
  * The arguments of `cut` and `reset`.
  *
@@ -229,8 +220,8 @@ export class Wire<R = undefined> implements ReadonlyWire<R> {
    *
    * If the {@linkcode Wire} is already dead, `fun` is called immediately.
    *
-   * `fun` should catch and handle its own errors. Errors thrown are
-   * reported with `reportError`.
+   * `fun` should catch and handle its own errors. If the {@linkcode Wire}
+   * is already dead, an error thrown by `fun` propagates to the caller.
    *
    * @param fun The callback invoked when a {@linkcode Wire} is cut.
    * @returns A function to unsubscribe from the {@linkcode Wire}'s cut
@@ -280,11 +271,7 @@ export class Wire<R = undefined> implements ReadonlyWire<R> {
     // Iterate the map itself so a listener can unsubscribe the ones after it.
     for (const [id, fun] of this.callbacks) {
       this.callbacks.delete(id);
-      try {
-        fun(reason);
-      } catch (error) {
-        report(error);
-      }
+      fun(reason);
     }
   }
 
@@ -436,8 +423,12 @@ export class Breaker<R = undefined> {
    * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
   public reset(...args: CutArgs<R>): Wire<R> {
-    this.cut(...args);
-    this.current = new Wire<R>();
+    try {
+      this.cut(...args);
+    } finally {
+      // A throwing listener must not leave the breaker holding a dead wire.
+      this.current = new Wire<R>();
+    }
     return this.current;
   }
 }
