@@ -5,7 +5,10 @@ lockfile_version = 2
 [[tools.deno]]
 version = "2.9.7"
 backend = "core:deno"
-specifiers = ["latest"]
+specifiers = [
+    "2.9.7",
+    "latest",
+]
 
 [tools.deno."platforms.linux-arm64"]
 checksum = "sha256:c832298b1ad4422481334855f6003e0f54145762c5a134f20a489511d2f65bbf"

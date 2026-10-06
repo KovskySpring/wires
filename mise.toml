@@ -1,5 +1,5 @@
 [tools]
-deno = "latest"
+deno = "2.9.7"
 
 [tasks.fmt]
 run = "deno fmt --check"
