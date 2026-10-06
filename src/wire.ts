@@ -102,6 +102,15 @@ const report: (error: unknown) => void =
       });
 
 /**
+ * The arguments of `cut` and `reset`.
+ *
+ * `reason` is optional when `undefined` is a valid reason, otherwise required.
+ *
+ * @template R The type of the reason the {@linkcode Wire} is dead.
+ */
+export type CutArgs<R> = undefined extends R ? [reason?: R] : [reason: R];
+
+/**
  * The callback invoked when a {@linkcode Wire} is cut.
  *
  * @param reason The reason the {@linkcode Wire} is cut.
@@ -264,58 +273,9 @@ export class Wire<R = undefined> implements ReadonlyWire<R> {
    * @param reason The reason the {@linkcode Wire} is cut.
    * @template R The type of the reason the {@linkcode Wire} is dead.
    */
-  public cut(this: Wire<undefined>, reason?: R): void;
-  /**
-   * Cut a {@linkcode Wire} and invoke all callbacks.
-   *
-   * The {@linkcode Wire} will be set to dead before the callbacks
-   * are invoked.
-   *
-   * Does nothing if the {@linkcode Wire} is already dead.
-   *
-   * If the reason type is `undefined` you can leave the param
-   * `reason` empty. Otherwise, a `reason` is required.
-   *
-   * This is done through class method this type overloading.
-   * Both overloadings will show up but Typescript will strictly
-   * enforce just one of them upon usage.
-   *
-   * Note: You might get some strange interface error where Typescript
-   * says that the `this` context of type `Wire<T>` is not assignable
-   * to method's `this` of type `Wire<undefined>`. This means
-   * you defined the type `R` but forgot to include a reason
-   * in your cut. `reason` is required in this scenario.
-   *
-   * @param reason The reason the {@linkcode Wire} is cut.
-   * @template R The type of the reason the {@linkcode Wire} is dead.
-   */
-  public cut<R>(this: Wire<R>, reason: R): void;
-  /**
-   * Cut a {@linkcode Wire} and invoke all callbacks.
-   *
-   * The {@linkcode Wire} will be set to dead before the callbacks
-   * are invoked.
-   *
-   * Does nothing if the {@linkcode Wire} is already dead.
-   *
-   * If the reason type is `undefined` you can leave the param
-   * `reason` empty. Otherwise, a `reason` is required.
-   *
-   * This is done through class method this type overloading.
-   * Both overloadings will show up but Typescript will strictly
-   * enforce just one of them upon usage.
-   *
-   * Note: You might get some strange interface error where Typescript
-   * says that the `this` context of type `Wire<T>` is not assignable
-   * to method's `this` of type `Wire<undefined>`. This means
-   * you defined the type `R` but forgot to include a reason
-   * in your cut. `reason` is required in this scenario.
-   *
-   * @param reason The reason the {@linkcode Wire} is cut.
-   * @template R The type of the reason the {@linkcode Wire} is dead.
-   */
-  public cut(reason: R): void {
+  public cut(...args: CutArgs<R>): void {
     if (!this.current.live) return;
+    const reason = args[0] as R;
     this.current = createDeadWireState(reason);
     // Iterate the map itself so a listener can unsubscribe the ones after it.
     for (const [id, fun] of this.callbacks) {
@@ -451,56 +411,8 @@ export class Breaker<R = undefined> {
    * @param reason The reason the {@linkcode Breaker} is cut.
    * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
-  public cut(this: Breaker<undefined>, reason?: R): void;
-  /**
-   * Cut the {@linkcode Breaker}'s current {@linkcode Wire} and invoke all callbacks.
-   *
-   * The {@linkcode Breaker} will be set to dead before the callbacks
-   * are invoked.
-   *
-   * Does nothing if the current {@linkcode Wire} is already dead.
-   *
-   * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
-   *
-   * This is done through class method this type overloading.
-   * Both overloadings will show up but Typescript will strictly
-   * enforce just one of them upon usage.
-   *
-   * Note: You might get some strange interface error where Typescript
-   * says that the `this` context of type `Breaker<T>` is not assignable
-   * to method's `this` of type `Breaker<undefined>`. This means
-   * you defined the type `R` but forgot to include a reason
-   * in your cut. `reason` is required in this scenario.
-   *
-   * @param reason The reason the {@linkcode Breaker} is cut.
-   * @template R The type of the reason the {@linkcode Breaker} is dead.
-   */
-  public cut<R>(this: Breaker<R>, reason: R): void;
-  /**
-   * Cut the {@linkcode Breaker}'s current {@linkcode Wire} and invoke all callbacks.
-   *
-   * The {@linkcode Breaker} will be set to dead before the callbacks
-   * are invoked.
-   *
-   * Does nothing if the current {@linkcode Wire} is already dead.
-   *
-   * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
-   *
-   * This is done through class method this type overloading.
-   * Both overloadings will show up but Typescript will strictly
-   * enforce just one of them upon usage.
-   *
-   * Note: You might get some strange interface error where Typescript
-   * says that the `this` context of type `Breaker<T>` is not assignable
-   * to method's `this` of type `Breaker<undefined>`. This means
-   * you defined the type `R` but forgot to include a reason
-   * in your cut. `reason` is required in this scenario.
-   *
-   * @param reason The reason the {@linkcode Breaker} is cut.
-   * @template R The type of the reason the {@linkcode Breaker} is dead.
-   */
-  public cut(reason: R): void {
-    this.current.cut(reason);
+  public cut(...args: CutArgs<R>): void {
+    this.current.cut(...args);
   }
 
   /**
@@ -523,50 +435,8 @@ export class Breaker<R = undefined> {
    * @param reason The reason the {@linkcode Breaker} is reset.
    * @template R The type of the reason the {@linkcode Breaker} is dead.
    */
-  public reset(this: Breaker<undefined>, reason?: R): Wire<R>;
-  /**
-   * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
-   *
-   * `reason` is ignored if the current {@linkcode Wire} is already dead.
-   *
-   * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
-   *
-   * This is done through class method this type overloading.
-   * Both overloadings will show up but Typescript will strictly
-   * enforce just one of them upon usage.
-   *
-   * Note: You might get some strange interface error where Typescript
-   * says that the `this` context of type `Breaker<T>` is not assignable
-   * to method's `this` of type `Breaker<undefined>`. This means
-   * you defined the type `R` but forgot to include a reason
-   * in your reset. `reason` is required in this scenario.
-   *
-   * @param reason The reason the {@linkcode Breaker} is reset.
-   * @template R The type of the reason the {@linkcode Breaker} is dead.
-   */
-  public reset<R>(this: Breaker<R>, reason: R): Wire<R>;
-  /**
-   * Reset the {@linkcode Breaker}'s current {@linkcode Wire} to a new live {@linkcode Wire}.
-   *
-   * `reason` is ignored if the current {@linkcode Wire} is already dead.
-   *
-   * If the reason type is `undefined` you can leave the param `reason` empty. Otherwise, a `reason` is required.
-   *
-   * This is done through class method this type overloading.
-   * Both overloadings will show up but Typescript will strictly
-   * enforce just one of them upon usage.
-   *
-   * Note: You might get some strange interface error where Typescript
-   * says that the `this` context of type `Breaker<T>` is not assignable
-   * to method's `this` of type `Breaker<undefined>`. This means
-   * you defined the type `R` but forgot to include a reason
-   * in your reset. `reason` is required in this scenario.
-   *
-   * @param reason The reason the {@linkcode Breaker} is reset.
-   * @template R The type of the reason the {@linkcode Breaker} is dead.
-   */
-  public reset(reason: R): Wire<R> {
-    this.cut(reason);
+  public reset(...args: CutArgs<R>): Wire<R> {
+    this.cut(...args);
     this.current = new Wire<R>();
     return this.current;
   }
